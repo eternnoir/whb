@@ -2,7 +2,6 @@ package converters
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -20,15 +19,10 @@ type HangoutChatParams struct {
 	Token  string `query:"gh_token"`
 }
 
-type HangoutChatMessage struct {
-	Text string `json:"text"`
-}
-
-func SendHangoutTextMesssage(params *HangoutChatParams, message string) error {
+func SendHangoutText(params *HangoutChatParams, data string) error {
 	url := fmt.Sprintf(HangoutChatWebHookUrl, params.Spaces, params.Key, params.Token)
-	logrus.WithField("url", url).WithField("params", params).WithField("msg", message).Info("Send hangout chant webhook request")
-	jsonStr, _ := json.Marshal(HangoutChatMessage{Text: message})
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+	logrus.WithField("url", url).WithField("params", params).WithField("msg", data).Info("Send hangout chant webhook request")
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(data)))
 	req.Header.Set("Content-Type", "application/json")
 
 	client := &http.Client{}

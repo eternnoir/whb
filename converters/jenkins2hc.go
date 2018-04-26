@@ -1,7 +1,8 @@
 package converters
 
 import (
-	"fmt"
+	"bytes"
+	"html/template"
 	"net/http"
 
 	"github.com/eternnoir/whb/conmgr"
@@ -10,12 +11,20 @@ import (
 )
 
 func init() {
-	conmgr.DefuaultConverterMgr.RegConverter(&Jenkins2HC{})
+	conmgr.DefuaultConverterMgr.RegConverter(NewJenkins2HC())
+	conmgr.DefuaultConverterMgr.RegConverter(&Crashlytics2HC{})
 }
 
-var Jenkins2HCTemplate = "[%s] %s - #%d - %s (<%s|Open>)"
+func NewJenkins2HC() *Jenkins2HC {
+	tmpl, err := template.New("j2hct").Parse(Jenkins2HCTemplate)
+	if err != nil {
+		panic(err)
+	}
+	return &Jenkins2HC{template: tmpl}
+}
 
 type Jenkins2HC struct {
+	template *template.Template
 }
 
 func (jh *Jenkins2HC) SourceName() string {
@@ -39,21 +48,22 @@ func (jh *Jenkins2HC) Process(c echo.Context) error {
 	}
 
 	logrus.WithField("params", params).WithField("req", p).Info("Receive")
-	msg := jh.toMsg(p)
-	if err := SendHangoutTextMesssage(params, msg); err != nil {
+	msg, err := jh.toMsg(p)
+	if err != nil {
+		return err
+	}
+	if err := SendHangoutText(params, msg); err != nil {
 		return err
 	}
 	return c.JSON(http.StatusOK, p)
 }
 
-func (jh *Jenkins2HC) toMsg(jp *JenkinsPayload) string {
-	return fmt.Sprintf(Jenkins2HCTemplate,
-		jp.Build.Phase,
-		jp.Name,
-		jp.Build.Number,
-		jp.Build.Status,
-		jp.Build.FullURL,
-	)
+func (jh *Jenkins2HC) toMsg(jp *JenkinsPayload) (string, error) {
+	var tpl bytes.Buffer
+	if err := jh.template.Execute(&tpl, jp); err != nil {
+		return "", err
+	}
+	return tpl.String(), nil
 }
 
 type JenkinsPayload struct {
@@ -81,3 +91,63 @@ type JenkinsPayload struct {
 	Name string `json:"name"`
 	URL  string `json:"url"`
 }
+
+func (jp *JenkinsPayload) IsFail() bool {
+	return jp.Build.Status == ""
+}
+
+var Jenkins2HCTemplate = `
+{
+  "cards": [
+    {
+      "header": {
+        "title": "{{.Name}}",
+        "subtitle": "{{.Build.Status}}",
+        {{if eq .Build.Status "SUCCESS"}}
+         "imageUrl": "http://ci.gotyourpoint.com:8080/static/813b537a/images/headshot.png"
+        {{else if eq .Build.Status ""}}
+         "imageUrl": "http://ci.gotyourpoint.com:8080/static/813b537a/images/headshot.png"
+        {{else}}
+          "imageUrl": "https://i2.wp.com/halclan.net/wp-content/uploads/2017/08/jenkins-logo.jpg"
+        {{end}}
+      },
+      "sections": [
+        {
+          "widgets": [
+              {
+                "keyValue": {
+                  "topLabel": "Build Number",
+                  "content": "{{.Build.Number}}"
+                  }
+              },
+              {
+                "keyValue": {
+                  "topLabel": "Phase",
+                  "content": "{{.Build.Phase}}"
+                }
+              }
+          ]
+        },
+        {
+          "widgets": [
+              {
+                  "buttons": [
+                    {
+                      "textButton": {
+                        "text": "OPEN URL",
+                        "onClick": {
+                          "openLink": {
+                            "url": "{{.Build.FullURL}}"
+                          }
+                        }
+                      }
+                    }
+                  ]
+              }
+          ]
+        }
+      ]
+    }
+  ]
+}
+`
