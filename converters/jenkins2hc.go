@@ -5,15 +5,9 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/eternnoir/whb/conmgr"
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
 )
-
-func init() {
-	conmgr.DefuaultConverterMgr.RegConverter(NewJenkins2HC())
-	conmgr.DefuaultConverterMgr.RegConverter(&Crashlytics2HC{})
-}
 
 func NewJenkins2HC() *Jenkins2HC {
 	tmpl, err := template.New("j2hct").Parse(Jenkins2HCTemplate)
@@ -41,12 +35,7 @@ func (jh *Jenkins2HC) Process(c echo.Context) error {
 		logrus.WithError(err).Error("Decode payload fail.")
 		return err
 	}
-	params := &HangoutChatParams{
-		Spaces: c.QueryParam("gh_spaces"),
-		Key:    c.QueryParam("gh_key"),
-		Token:  c.QueryParam("gh_token"),
-	}
-
+	params := ParseHangoutChatParams(c)
 	logrus.WithField("params", params).WithField("req", p).Info("Receive")
 	msg, err := jh.toMsg(p)
 	if err != nil {
@@ -98,6 +87,9 @@ func (jp *JenkinsPayload) IsFail() bool {
 
 var Jenkins2HCTemplate = `
 {
+          {{if eq .Build.Status "FAILURE"}}
+  "text": "<users/all> Jenkins Job Fail!!!!!",
+          {{end}}
   "cards": [
     {
       "header": {
