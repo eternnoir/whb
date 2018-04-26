@@ -11,16 +11,24 @@ import (
 )
 
 var (
+	aListenPort = ""
 	aListenAddr = ""
 	log         = logrus.WithField("module", "whb")
 )
 
 var flags = []cli.Flag{
 	cli.StringFlag{
+		Name:        "port, p",
+		Usage:       "Server listen port.",
+		EnvVar:      "PORT",
+		Value:       "8080",
+		Destination: &aListenPort,
+	},
+	cli.StringFlag{
 		Name:        "addr, a",
-		Usage:       "Server listen address.",
+		Usage:       "Server listen addr.",
 		EnvVar:      "ADDR",
-		Value:       ":8080",
+		Value:       "0.0.0.0",
 		Destination: &aListenAddr,
 	},
 }
@@ -32,7 +40,7 @@ func start(c *cli.Context) error {
 	}))
 	e.Use(middleware.Logger())
 	bindRoute(e)
-	return e.Start(aListenAddr)
+	return e.Start(aListenAddr + ":" + aListenPort)
 }
 
 func main() {
