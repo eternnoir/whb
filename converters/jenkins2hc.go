@@ -44,15 +44,6 @@ func (jh *Jenkins2HC) Process(c echo.Context) error {
 		return err
 	}
 	return c.JSON(http.StatusOK, p)
-	/*
-		m := echo.Map{}
-		if err := c.Bind(&m); err != nil {
-			return err
-		}
-		jsonstr, _ := json.Marshal(m)
-		fmt.Println(string(jsonstr))
-		return c.JSON(200, m)
-	*/
 }
 
 func (jh *Jenkins2HC) toMsg(jp *JenkinsPayload) string {
