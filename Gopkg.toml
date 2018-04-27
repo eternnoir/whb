@@ -26,8 +26,16 @@
 
 
 [[constraint]]
+  branch = "master"
+  name = "github.com/eternnoir/echo-logrusmiddleware"
+
+[[constraint]]
   name = "github.com/labstack/echo"
   version = "3.3.5"
+
+[[constraint]]
+  name = "github.com/line/line-bot-sdk-go"
+  version = "1.0.0"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"

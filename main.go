@@ -3,7 +3,8 @@ package main
 import (
 	"os"
 
-	_ "github.com/eternnoir/whb/converters"
+	logrusmiddleware "github.com/eternnoir/echo-logrusmiddleware"
+	_ "github.com/eternnoir/whb/hangoutschat"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/sirupsen/logrus"
@@ -38,7 +39,8 @@ func start(c *cli.Context) error {
 	e.Use(middleware.RecoverWithConfig(middleware.RecoverConfig{
 		StackSize: 1 << 10, // 1 KB
 	}))
-	e.Use(middleware.Logger())
+	e.Logger = logrusmiddleware.Logger{logrus.StandardLogger()}
+	e.Use(logrusmiddleware.Hook())
 	bindRoute(e)
 	return e.Start(aListenAddr + ":" + aListenPort)
 }

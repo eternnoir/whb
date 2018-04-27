@@ -1,4 +1,4 @@
-package converters
+package hangoutschat
 
 import (
 	"bytes"

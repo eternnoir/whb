@@ -10,7 +10,6 @@ import (
 func bindRoute(ec *echo.Echo) {
 	ec.GET("/", welcome)
 	ec.POST("/:source/:target", bridge)
-	ec.GET("/:source/:target", bridge)
 }
 
 func welcome(c echo.Context) error {
