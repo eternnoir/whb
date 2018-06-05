@@ -26,7 +26,7 @@ func (ch *Crashlytics2HC) SourceName() string {
 }
 
 func (ch *Crashlytics2HC) TargetName() string {
-	return "hangoutchat"
+	return "hangoutschat"
 }
 func (ch *Crashlytics2HC) Process(c echo.Context) error {
 	p := new(CrashlyticsPayload)

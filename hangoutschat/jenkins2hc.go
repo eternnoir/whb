@@ -26,7 +26,7 @@ func (jh *Jenkins2HC) SourceName() string {
 }
 
 func (jh *Jenkins2HC) TargetName() string {
-	return "hangoutchat"
+	return "hangoutschat"
 }
 
 func (jh *Jenkins2HC) Process(c echo.Context) error {

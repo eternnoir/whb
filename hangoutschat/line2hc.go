@@ -29,7 +29,7 @@ func (lh *Line2HC) SourceName() string {
 }
 
 func (lh *Line2HC) TargetName() string {
-	return "hangoutchat"
+	return "hangoutschat"
 }
 
 func (lh *Line2HC) Process(c echo.Context) error {
