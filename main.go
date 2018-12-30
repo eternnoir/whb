@@ -5,6 +5,7 @@ import (
 
 	logrusmiddleware "github.com/eternnoir/echo-logrusmiddleware"
 	_ "github.com/eternnoir/whb/hangoutschat"
+	_ "github.com/eternnoir/whb/msteams"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/sirupsen/logrus"
